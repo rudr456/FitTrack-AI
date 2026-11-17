@@ -1,6 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import API from "../api/axios.js";
 
 function Login() {
   const navigate = useNavigate();
@@ -17,24 +17,25 @@ function Login() {
       setLoading(true);
       setMessage("");
 
-      const response = await axios.post(
-        "http://localhost:8000/api/auth/login",
-        {
-          email,
-          password,
-        },
-      );
+      const response = await API.post("/auth/login", {
+        email,
+        password,
+      });
 
       const { token } = response.data;
 
-      localStorage.setItem("token", token);
+      if (!token) {
+        throw new Error("Login response did not contain a token.");
+      }
 
-      setMessage("Login successful!");
+      localStorage.setItem("token", token);
 
       navigate("/dashboard", { replace: true });
     } catch (error) {
       setMessage(
-        error.response?.data?.message || "Login failed. Please try again.",
+        error.response?.data?.message ||
+          error.message ||
+          "Login failed. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -79,12 +80,16 @@ function Login() {
         {message && (
           <p
             className={`login-message ${
-              message.toLowerCase().includes("failed") ? "login-error" : ""
+              message.toLowerCase().includes("success") ? "" : "login-error"
             }`}
           >
             {message}
           </p>
         )}
+
+        <p className="register-link">
+          Don't have an account? <Link to="/register">Register here</Link>
+        </p>
       </div>
     </div>
   );

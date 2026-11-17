@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import {
   BrowserRouter,
   Routes,
@@ -11,13 +10,14 @@ import {
 
 import "./App.css";
 
+import API from "./api/axios.js";
+
 import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
 import Workouts from "./pages/WorkoutPage.jsx";
 import Nutrition from "./pages/Nutrition.jsx";
 import Progress from "./pages/Progress.jsx";
 import AICoach from "./pages/AICoach.jsx";
-
-import API from "./api/axios.js";
 
 // ========================================
 // DASHBOARD
@@ -40,13 +40,11 @@ function Dashboard() {
   const [loadingWorkouts, setLoadingWorkouts] = useState(true);
   const [workoutError, setWorkoutError] = useState("");
 
-  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login", { replace: true });
   };
 
-  // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
       // Nutrition summary
@@ -298,34 +296,10 @@ function Dashboard() {
 // PROTECTED ROUTES
 // ========================================
 
-function ProtectedDashboard() {
+function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
 
-  return token ? <Dashboard /> : <Navigate to="/login" replace />;
-}
-
-function ProtectedWorkouts() {
-  const token = localStorage.getItem("token");
-
-  return token ? <Workouts /> : <Navigate to="/login" replace />;
-}
-
-function ProtectedNutrition() {
-  const token = localStorage.getItem("token");
-
-  return token ? <Nutrition /> : <Navigate to="/login" replace />;
-}
-
-function ProtectedProgress() {
-  const token = localStorage.getItem("token");
-
-  return token ? <Progress /> : <Navigate to="/login" replace />;
-}
-
-function ProtectedAICoach() {
-  const token = localStorage.getItem("token");
-
-  return token ? <AICoach /> : <Navigate to="/login" replace />;
+  return token ? children : <Navigate to="/login" replace />;
 }
 
 // ========================================
@@ -348,17 +322,55 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
 
+        {/* Public routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        <Route path="/dashboard" element={<ProtectedDashboard />} />
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/workouts" element={<ProtectedWorkouts />} />
+        <Route
+          path="/workouts"
+          element={
+            <ProtectedRoute>
+              <Workouts />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/nutrition" element={<ProtectedNutrition />} />
+        <Route
+          path="/nutrition"
+          element={
+            <ProtectedRoute>
+              <Nutrition />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/progress" element={<ProtectedProgress />} />
+        <Route
+          path="/progress"
+          element={
+            <ProtectedRoute>
+              <Progress />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/ai-coach" element={<ProtectedAICoach />} />
+        <Route
+          path="/ai-coach"
+          element={
+            <ProtectedRoute>
+              <AICoach />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
